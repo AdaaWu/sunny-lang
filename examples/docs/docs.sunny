@@ -1,0 +1,25 @@
+// Sunny Lang Documentation Server
+// Run: sun serve examples/docs/docs.sunny 3000
+// Then visit: http://localhost:3000/home
+
+// GET /home - 首頁
+fn homeIndex() -> String {
+    lit layout = read_file("examples/docs/layout.html")
+    lit md = read_file("examples/docs/pages/home.md")
+    lit content = render_md(md)
+    out render_template(layout, {"title": "Home", "content": content})
+}
+
+// GET /doc/:id - 文檔頁面 (getting-started, syntax, shadow)
+fn docShow(id: String) -> String | Shadow {
+    lit layout = read_file("examples/docs/layout.html")
+    lit path = "examples/docs/pages/" + id + ".md"
+    lit md = read_file(path)
+    lit content = render_md(md)
+    out render_template(layout, {"title": id, "content": content})
+}
+
+// GET /health
+fn healthIndex() -> Map {
+    out {"status": "ok", "engine": "Sunny Lang", "version": "0.1.0"}
+}

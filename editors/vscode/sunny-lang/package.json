@@ -1,0 +1,35 @@
+{
+  "name": "sunny-lang",
+  "displayName": "Sunny Language",
+  "description": "Syntax highlighting for the Sunny programming language",
+  "version": "0.1.0",
+  "publisher": "sunny-lang",
+  "engines": {
+    "vscode": "^1.60.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "sunny",
+        "aliases": [
+          "Sunny",
+          "sunny"
+        ],
+        "extensions": [
+          ".sunny"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "sunny",
+        "scopeName": "source.sunny",
+        "path": "./syntaxes/sunny.tmLanguage.json"
+      }
+    ]
+  }
+}

@@ -1,0 +1,32 @@
+// Sunny HTTP Server Demo
+// Run: sunny-lang serve examples/server.sunny
+// Then: curl http://localhost:3000/product
+//       curl http://localhost:3000/product/42
+
+// GET /product - 列出所有商品
+fn productIndex() -> List {
+    out [
+        {"id": 1, "name": "Sunny T-Shirt", "price": 29},
+        {"id": 2, "name": "Sunny Mug", "price": 15},
+        {"id": 3, "name": "Sunny Sticker", "price": 5}
+    ]
+}
+
+// GET /product/:id - 查詢單一商品
+fn productShow(id: Int) -> Map | Shadow {
+    if id == 1 {
+        out {"id": 1, "name": "Sunny T-Shirt", "price": 29}
+    }
+    if id == 2 {
+        out {"id": 2, "name": "Sunny Mug", "price": 15}
+    }
+    if id == 3 {
+        out {"id": 3, "name": "Sunny Sticker", "price": 5}
+    }
+    out Shadow("product not found")
+}
+
+// GET /health - 健康檢查
+fn healthIndex() -> Map {
+    out {"status": "ok", "lang": "Sunny"}
+}

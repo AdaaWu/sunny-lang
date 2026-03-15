@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ title }} - Sunny Lang</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f0f17;
+      --surface: #1a1a2e;
+      --card: #222240;
+      --border: #2d2d52;
+      --text: #e0e0f0;
+      --text-dim: #8888aa;
+      --accent: #f9e2af;
+      --link: #89b4fa;
+      --code-bg: #16161e;
+      --keyword: #ff79c6;
+      --string: #f1fa8c;
+      --number: #bd93f9;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+    }
+    .layout {
+      display: flex;
+      min-height: 100vh;
+    }
+    /* Sidebar */
+    .sidebar {
+      width: 260px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 24px 0;
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    .sidebar-logo {
+      padding: 0 24px 20px;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--accent);
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+    .sidebar-logo span {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      font-weight: 400;
+    }
+    .sidebar nav a {
+      display: block;
+      padding: 8px 24px;
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: all 0.15s;
+    }
+    .sidebar nav a:hover, .sidebar nav a.active {
+      color: var(--accent);
+      background: rgba(249, 226, 175, 0.05);
+    }
+    /* Content */
+    .content {
+      margin-left: 260px;
+      flex: 1;
+      max-width: 800px;
+      padding: 48px 48px 80px;
+    }
+    h1 { font-size: 2rem; color: var(--accent); margin-bottom: 16px; }
+    h2 { font-size: 1.4rem; color: var(--accent); margin: 32px 0 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+    h3 { font-size: 1.1rem; color: var(--text); margin: 24px 0 8px; }
+    p { margin-bottom: 16px; }
+    a { color: var(--link); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    ul, ol { margin: 0 0 16px 24px; }
+    li { margin-bottom: 4px; }
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--code-bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.88em;
+    }
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      overflow-x: auto;
+      margin-bottom: 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.88em;
+      line-height: 1.6;
+    }
+    pre code { background: none; padding: 0; }
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding: 8px 16px;
+      margin: 16px 0;
+      color: var(--text-dim);
+      background: var(--card);
+      border-radius: 0 8px 8px 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 16px;
+    }
+    th, td {
+      text-align: left;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    th { color: var(--accent); font-weight: 600; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+    .footer {
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-dim);
+      font-size: 0.85rem;
+      text-align: center;
+    }
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .content { margin-left: 0; padding: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-logo">Sunny Lang <span>v0.1.0</span></div>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="tutorial.html">Tutorial</a>
+        <a href="syntax.html">Syntax Reference</a>
+        <a href="types.html">Type System</a>
+        <a href="builtins.html">Built-in Functions</a>
+        <a href="shadow.html">Shadow (Errors)</a>
+        <a href="server.html">HTTP Server</a>
+        <a href="playground.html">Playground</a>
+      </nav>
+    </aside>
+    <main class="content">
+      {{ content }}
+      <div class="footer">
+        Powered by Sunny Lang &mdash; Built with Sunny
+      </div>
+    </main>
+  </div>
+</body>
+</html>

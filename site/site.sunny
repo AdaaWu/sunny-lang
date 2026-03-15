@@ -1,0 +1,18 @@
+// Sunny 文檔網站產生器 — 自舉！
+// 用 Sunny 語言讀取 Markdown 頁面，渲染成完整的 HTML 文檔。
+
+lit layout = read_file("site/layouts/base.html")
+lit pages = ["index", "tutorial", "syntax", "types", "builtins", "shadow", "server", "playground"]
+
+for name in pages {
+    lit md = read_file("site/pages/" + name + ".md")
+    lit html = render_md(md)
+    lit page = render_template(layout, {
+        "title": name,
+        "content": html
+    })
+    write_file("dist/" + name + ".html", page)
+    print("Built: dist/" + name + ".html")
+}
+
+print("Done! Built " + to_string(len(pages)) + " pages.")

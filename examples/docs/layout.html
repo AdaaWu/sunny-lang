@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} - Sunny Lang</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; line-height: 1.6; color: #333; }
+        nav { background: #f7b731; padding: 1rem 2rem; display: flex; gap: 2rem; align-items: center; }
+        nav a { color: #333; text-decoration: none; font-weight: 500; }
+        nav .brand { font-size: 1.3rem; font-weight: 700; }
+        main { max-width: 800px; margin: 2rem auto; padding: 0 2rem; }
+        h1 { color: #e67e22; margin-bottom: 1rem; }
+        h2 { color: #d35400; margin: 1.5rem 0 0.5rem; }
+        h3 { margin: 1rem 0 0.5rem; }
+        p { margin-bottom: 1rem; }
+        pre { background: #2d2d2d; color: #f8f8f2; padding: 1rem; border-radius: 6px; overflow-x: auto; margin: 1rem 0; }
+        code { background: #f0f0f0; padding: 0.2em 0.4em; border-radius: 3px; font-size: 0.9em; }
+        pre code { background: none; padding: 0; }
+        ul { margin: 0.5rem 0 1rem 1.5rem; }
+        li { margin-bottom: 0.3rem; }
+        blockquote { border-left: 4px solid #f7b731; padding: 0.5rem 1rem; margin: 1rem 0; background: #fff9e6; }
+        a { color: #e67e22; }
+        hr { border: none; border-top: 2px solid #f0f0f0; margin: 2rem 0; }
+        footer { text-align: center; padding: 2rem; color: #999; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/" class="brand">Sunny Lang</a>
+        <a href="/">Home</a>
+        <a href="/doc/getting-started">Getting Started</a>
+        <a href="/doc/syntax">Syntax</a>
+        <a href="/doc/shadow">Shadow</a>
+    </nav>
+    <main>
+        {{ content }}
+    </main>
+    <footer>Powered by Sunny Lang - All APIs written in Sunny</footer>
+</body>
+</html>

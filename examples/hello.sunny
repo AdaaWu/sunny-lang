@@ -1,0 +1,73 @@
+// Sunny Lang - Hello World
+
+lit name = "Sunny"
+lit version = 1
+
+print("Welcome to " + name + " Lang!")
+print("version:", version)
+
+// 函數定義與呼叫
+fn addStore(a: Int, b: Int) -> Int {
+    out a + b
+}
+
+lit result = addStore(10, 20)
+print("10 + 20 =", result)
+
+// Shadow 錯誤處理
+fn dataShow(id: Int) -> String | Shadow {
+    if id < 0 {
+        out Shadow("ID must be positive")
+    }
+    out "Valid Data"
+}
+
+lit ok = dataShow(5)
+match ok {
+    is String val -> print("Success:", val)
+    is Shadow s -> print("Error:", s.message)
+}
+
+lit bad = dataShow(-1)
+match bad {
+    is String val -> print("Success:", val)
+    is Shadow s -> print("Error:", s.message)
+}
+
+// for 迴圈
+lit items = [1, 2, 3, 4, 5]
+for item in items {
+    print(item)
+}
+
+// ── M2: 內建方法展示 ──
+
+// List 方法
+lit fruits = ["apple", "banana"]
+lit moreFruits = fruits.push("cherry")
+print("fruits:", moreFruits.join(", "))
+print("first:", moreFruits.first())
+print("length:", moreFruits.length)
+print("has banana?", moreFruits.contains("banana"))
+print("reversed:", moreFruits.reverse().join(", "))
+
+// String 方法
+lit greeting = "  Hello, Sunny!  "
+print("trimmed:", greeting.trim())
+print("upper:", greeting.trim().upper())
+print("contains Sunny?", greeting.contains("Sunny"))
+lit parts = "a,b,c".split(",")
+print("split:", parts.join(" | "))
+
+// Map 方法
+lit user = {"name": "Sunny", "role": "creator"}
+print("keys:", user.keys().join(", "))
+print("has role?", user.has("role"))
+lit smaller = user.remove("role")
+print("after remove:", smaller.keys().join(", "))
+
+// Shadow 方法鏈
+lit err = Shadow("not found")
+lit wrapped = err.wrap("DB")
+print("wrapped:", wrapped.message)
+print("unwrap_or:", err.unwrap_or("fallback"))

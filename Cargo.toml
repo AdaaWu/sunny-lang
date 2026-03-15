@@ -1,0 +1,21 @@
+[package]
+name = "sunny-lang"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+path = "src/lib.rs"
+
+[[bin]]
+name = "sun"
+path = "src/main.rs"
+
+[dependencies]
+tiny_http = { version = "0.12", optional = true }
+wasm-bindgen = { version = "0.2", optional = true }
+
+[features]
+default = ["native"]
+native = ["dep:tiny_http"]
+wasm = ["dep:wasm-bindgen"]

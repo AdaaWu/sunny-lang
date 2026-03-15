@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sunny Playground</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="header">
+  <h1>Sunny Playground <span>v0.1.0</span></h1>
+  <div class="header-actions">
+    <select id="examples" onchange="loadExample()">
+      <option value="">-- Select Example --</option>
+    </select>
+    <button class="btn btn-run" onclick="runCode()" title="Ctrl+Enter">Run</button>
+    <button class="btn btn-share" onclick="shareCode()">Share</button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="panel">
+    <div class="panel-header">Editor</div>
+    <div class="editor-wrap">
+      <div id="highlight"></div>
+      <textarea id="editor" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
+    </div>
+  </div>
+  <div class="divider"></div>
+  <div class="panel">
+    <div class="panel-header">Output</div>
+    <div class="output-wrap" id="output">
+      <div class="output-info">Press Run or Ctrl+Enter to execute.</div>
+    </div>
+  </div>
+</div>
+
+<script src="examples.js"></script>
+<script src="syntax.js"></script>
+<script src="runner.js"></script>
+<script>
+  const editor = document.getElementById('editor');
+  const highlight = document.getElementById('highlight');
+  const output = document.getElementById('output');
+  const exampleSelect = document.getElementById('examples');
+
+  // Populate examples
+  for (const [key, ex] of Object.entries(EXAMPLES)) {
+    const opt = document.createElement('option');
+    opt.value = key;
+    opt.textContent = ex.name;
+    exampleSelect.appendChild(opt);
+  }
+
+  // Load from URL hash
+  function init() {
+    const hash = window.location.hash.slice(1);
+    if (hash) {
+      try {
+        editor.value = decodeURIComponent(atob(hash));
+      } catch (e) {
+        editor.value = EXAMPLES.hello.code;
+      }
+    } else {
+      editor.value = EXAMPLES.hello.code;
+    }
+    updateHighlight();
+    initWasm();
+  }
+
+  function loadExample() {
+    const key = exampleSelect.value;
+    if (key && EXAMPLES[key]) {
+      editor.value = EXAMPLES[key].code;
+      updateHighlight();
+      exampleSelect.value = '';
+    }
+  }
+
+  function updateHighlight() {
+    highlight.innerHTML = highlightSunny(editor.value) + '\n';
+  }
+
+  function runCode() {
+    const source = editor.value;
+    const result = runSunny(source);
+
+    let html = '';
+    if (result.output && result.output.length > 0) {
+      for (const line of result.output) {
+        html += `<div class="output-line">${escapeOutputHtml(line)}</div>`;
+      }
+    }
+    if (result.result && result.result !== 'void' && result.result !== 'null') {
+      html += `<div class="output-result">=> ${escapeOutputHtml(result.result)}</div>`;
+    }
+    if (result.error) {
+      const errStr = Array.isArray(result.error) ? result.error.join('\n') : result.error;
+      html += `<div class="output-error">${escapeOutputHtml(errStr)}</div>`;
+    }
+    if (!html) {
+      html = '<div class="output-info">No output.</div>';
+    }
+
+    output.innerHTML = html;
+  }
+
+  function shareCode() {
+    const encoded = btoa(encodeURIComponent(editor.value));
+    const url = window.location.origin + window.location.pathname + '#' + encoded;
+    navigator.clipboard.writeText(url).then(() => {
+      const btn = document.querySelector('.btn-share');
+      btn.textContent = 'Copied!';
+      setTimeout(() => { btn.textContent = 'Share'; }, 1500);
+    }).catch(() => {
+      window.location.hash = encoded;
+    });
+  }
+
+  function escapeOutputHtml(str) {
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  // Editor events
+  editor.addEventListener('input', updateHighlight);
+  editor.addEventListener('scroll', () => {
+    highlight.scrollTop = editor.scrollTop;
+    highlight.scrollLeft = editor.scrollLeft;
+  });
+
+  // Tab support
+  editor.addEventListener('keydown', (e) => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const start = editor.selectionStart;
+      const end = editor.selectionEnd;
+      editor.value = editor.value.substring(0, start) + '    ' + editor.value.substring(end);
+      editor.selectionStart = editor.selectionEnd = start + 4;
+      updateHighlight();
+    }
+    // Ctrl+Enter to run
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      e.preventDefault();
+      runCode();
+    }
+  });
+
+  init();
+</script>
+
+</body>
+</html>
