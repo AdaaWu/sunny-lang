@@ -167,15 +167,6 @@ sunny-lang/
 
 ROADMAP.md 內的 Phase 5–9（語言補強、WASM、Playground、文檔自舉、部署）即是上述後半部的規劃；M1–M4 對應 STEP.md 的四個月進度表。
 
-## 技術亮點（面試可深入討論）
-
-- **Pratt Parsing**：以 9 級優先級（`Lowest` → `Index`）的 `parse_expression(precedence)` 處理前綴／中綴運算，新增運算子只需註冊優先級與解析函數，不需改寫文法層級。
-- **Environment 鏈**：每次進入函數或區塊就建立新的 `Environment`，`outer` 指向外層；變數查找沿鏈向上，同時負責執行 `lit` 不可變性檢查，也是閉包能捕捉外部作用域的基礎。
-- **Shadow 錯誤模型**：評估結果為 `EvalResult`（`Val` / `Output` / `Err`），錯誤以 `Shadow` 值在程式中傳遞並強制用 `match` 處理，語言層面不使用 `panic!` 或例外。
-- **編譯期規範**：Linter 在執行前走訪 AST，把命名慣例（Resource Action 後綴）變成語言規則，並直接驅動 HTTP 路由映射。
-- **WebAssembly**：同一個 Evaluator 透過 `wasm-bindgen` 匯出 `eval_sunny` / `tokenize_sunny`，用 Cargo feature（`native` / `wasm`）隔離 `tiny_http` 等非 WASM 相容依賴，讓瀏覽器 Playground 不需後端。
-- **自舉（Self-hosting）**：文檔網站是 Sunny 程式（`site/site.sunny`）呼叫內建的 `read_file`、`render_md`、`render_template`、`write_file` 產生；CI 先 `cargo test`，再用剛建好的 `sun` 產生 `dist/` 並部署，語言因此被自己的產出持續驗證。
-
 ## 測試
 
 `cargo test` 目前執行 180 個單元測試（`src/lib.rs` 內各模組），全數通過。

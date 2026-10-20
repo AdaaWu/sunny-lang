@@ -169,15 +169,6 @@ sunny-lang/
 
 Phases 5–9 in ROADMAP.md (language improvements, WASM, Playground, self-hosted docs, deployment) are the plan for the second half of the table above; M1–M4 correspond to the four-month schedule in STEP.md.
 
-## Technical Highlights (good interview talking points)
-
-- **Pratt parsing**: `parse_expression(precedence)` handles prefix and infix operators across 9 precedence levels (`Lowest` → `Index`). Adding an operator only requires registering a precedence and a parse function, with no need to restructure grammar levels.
-- **Environment chain**: entering a function or block creates a new `Environment` whose `outer` points to the enclosing one. Variable lookup walks up the chain, which also enforces `lit` immutability and is what lets closures capture their outer scope.
-- **Shadow error model**: evaluation yields an `EvalResult` (`Val` / `Output` / `Err`). Errors travel through the program as `Shadow` values and must be handled with `match`; the language itself uses neither `panic!` nor exceptions.
-- **Compile-time conventions**: the linter walks the AST before execution and turns a naming convention (Resource Action suffixes) into a language rule, which in turn drives HTTP route mapping.
-- **WebAssembly**: the same evaluator exports `eval_sunny` / `tokenize_sunny` through `wasm-bindgen`. Cargo features (`native` / `wasm`) isolate dependencies such as `tiny_http` that are not WASM-compatible, so the browser Playground needs no backend.
-- **Self-hosting**: the docs site is a Sunny program (`site/site.sunny`) that calls the built-in `read_file`, `render_md`, `render_template` and `write_file`. CI runs `cargo test` first, then uses the freshly built `sun` to generate `dist/` and deploy it, so the language is continuously validated by its own output.
-
 ## Testing
 
 `cargo test` currently runs 180 unit tests (in the modules under `src/lib.rs`), and all of them pass.
