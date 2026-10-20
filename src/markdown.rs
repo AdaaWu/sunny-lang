@@ -8,6 +8,7 @@
 /// - > 引用
 /// - --- 分隔線
 /// - [連結](url)
+/// - | 表格 | (含對齊列、行內代碼內的 `|`、`\|` 跳脫)
 /// - 空行產生段落分隔
 
 pub fn render(input: &str) -> String {
@@ -95,6 +96,33 @@ pub fn render(input: &str) -> String {
             continue;
         }
 
+        // 表格：標題列 + 分隔列 (|---|:---:|) + 資料列
+        if line.contains('|') && i + 1 < len {
+            if let Some(aligns) = parse_table_separator(lines[i + 1]) {
+                let header = split_table_row(line);
+                if header.len() == aligns.len() {
+                    html.push_str("<div class=\"table-wrap\"><table>\n<thead>\n<tr>");
+                    for (c, cell) in header.iter().enumerate() {
+                        html.push_str(&table_cell("th", aligns[c], cell));
+                    }
+                    html.push_str("</tr>\n</thead>\n<tbody>\n");
+                    i += 2;
+                    while i < len && !lines[i].trim().is_empty() && lines[i].contains('|') {
+                        let mut cells = split_table_row(lines[i]);
+                        cells.resize(aligns.len(), String::new());
+                        html.push_str("<tr>");
+                        for (c, cell) in cells.iter().enumerate() {
+                            html.push_str(&table_cell("td", aligns[c], cell));
+                        }
+                        html.push_str("</tr>\n");
+                        i += 1;
+                    }
+                    html.push_str("</tbody>\n</table></div>\n");
+                    continue;
+                }
+            }
+        }
+
         // 空行
         if trimmed.is_empty() {
             i += 1;
@@ -113,6 +141,10 @@ pub fn render(input: &str) -> String {
                 || l.starts_with("* ")
                 || l == "---"
                 || l == "***"
+                || (l.contains('|')
+                    && para_lines.is_empty() == false
+                    && i + 1 < len
+                    && parse_table_separator(lines[i + 1]).is_some())
             {
                 break;
             }
@@ -125,6 +157,86 @@ pub fn render(input: &str) -> String {
     }
 
     html
+}
+
+#[derive(Clone, Copy, PartialEq)]
+enum Align {
+    None,
+    Left,
+    Center,
+    Right,
+}
+
+/// 將表格列拆成儲存格：忽略頭尾 `|`，行內代碼中的 `|` 與 `\|` 不分割
+fn split_table_row(line: &str) -> Vec<String> {
+    let chars: Vec<char> = line.trim().chars().collect();
+    let mut cells = Vec::new();
+    let mut cur = String::new();
+    let mut in_code = false;
+    let mut i = 0;
+    while i < chars.len() {
+        let c = chars[i];
+        if c == '\\' && i + 1 < chars.len() && chars[i + 1] == '|' {
+            cur.push('|');
+            i += 2;
+            continue;
+        }
+        if c == '`' {
+            in_code = !in_code;
+        }
+        if c == '|' && !in_code {
+            cells.push(std::mem::take(&mut cur));
+        } else {
+            cur.push(c);
+        }
+        i += 1;
+    }
+    cells.push(cur);
+    if chars.first() == Some(&'|') {
+        cells.remove(0);
+    }
+    if chars.last() == Some(&'|') && !(chars.len() >= 2 && chars[chars.len() - 2] == '\\') {
+        cells.pop();
+    }
+    cells.into_iter().map(|c| c.trim().to_string()).collect()
+}
+
+/// 解析分隔列；不是合法分隔列則回傳 None
+fn parse_table_separator(line: &str) -> Option<Vec<Align>> {
+    let t = line.trim();
+    if !t.contains('-') || !t.contains('|') {
+        return None;
+    }
+    let cells = split_table_row(t);
+    if cells.is_empty() {
+        return None;
+    }
+    let mut aligns = Vec::new();
+    for c in cells {
+        let left = c.starts_with(':');
+        let right = c.ends_with(':');
+        let core = c.trim_matches(':');
+        if core.is_empty() || !core.chars().all(|ch| ch == '-') {
+            return None;
+        }
+        aligns.push(match (left, right) {
+            (true, true) => Align::Center,
+            (true, false) => Align::Left,
+            (false, true) => Align::Right,
+            _ => Align::None,
+        });
+    }
+    Some(aligns)
+}
+
+fn table_cell(tag: &str, align: Align, content: &str) -> String {
+    let style = match align {
+        Align::None => "",
+        Align::Left => " style=\"text-align:left\"",
+        Align::Center => " style=\"text-align:center\"",
+        Align::Right => " style=\"text-align:right\"",
+    };
+    format!("<{t}{s}>{c}</{t}>", t = tag, s = style, c = render_inline(content))
 }
 
 /// 行內格式：**粗體**, *斜體*, `code`, [link](url)
@@ -328,5 +440,48 @@ fn helloShow() -> String {
         assert!(html.contains("<pre><code class=\"language-sunny\">"));
         assert!(html.contains("<hr>"));
         assert!(html.contains("<a href=\"https://sunny.dev\">"));
+    }
+
+    #[test]
+    fn test_table_basic() {
+        let out = render("| a | b |\n|---|---|\n| 1 | 2 |\n");
+        assert_eq!(
+            out,
+            "<div class=\"table-wrap\"><table>\n<thead>\n<tr><th>a</th><th>b</th></tr>\n</thead>\n<tbody>\n<tr><td>1</td><td>2</td></tr>\n</tbody>\n</table></div>\n"
+        );
+    }
+
+    #[test]
+    fn test_table_alignment() {
+        let out = render("| a | b | c |\n|:--|:-:|--:|\n| 1 | 2 | 3 |");
+        assert!(out.contains("<th style=\"text-align:left\">a</th>"));
+        assert!(out.contains("<th style=\"text-align:center\">b</th>"));
+        assert!(out.contains("<td style=\"text-align:right\">3</td>"));
+    }
+
+    #[test]
+    fn test_table_inline_code_and_pipes() {
+        let out = render("| op | desc |\n|--|--|\n| `or` / `||` | a \\| b |");
+        assert!(out.contains("<td><code>or</code> / <code>||</code></td>"));
+        assert!(out.contains("<td>a | b</td>"));
+    }
+
+    #[test]
+    fn test_table_no_outer_pipes_and_short_row() {
+        let out = render("a | b\n--|--\n| 1");
+        assert!(out.contains("<th>a</th><th>b</th>"));
+        assert!(out.contains("<td>1</td><td></td>"));
+    }
+
+    #[test]
+    fn test_table_escape_and_following_paragraph() {
+        let out = render("| x |\n|---|\n| <b> |\n\nafter");
+        assert!(out.contains("<td>&lt;b&gt;</td>"));
+        assert!(out.contains("</table></div>\n<p>after</p>"));
+    }
+
+    #[test]
+    fn test_pipe_text_not_table() {
+        assert_eq!(render("a | b"), "<p>a | b</p>\n");
     }
 }
