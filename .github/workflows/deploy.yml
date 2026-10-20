@@ -16,12 +16,14 @@ concurrency:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
 
       - name: Cache Cargo
         uses: actions/cache@v4
@@ -41,8 +43,19 @@ jobs:
       - name: Generate Docs (self-hosted with Sunny)
         run: ./target/release/sun site/site.sunny
 
+      - name: Install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+      - name: Build Playground WASM
+        run: |
+          wasm-pack build --target web --out-dir playground/pkg -- --no-default-features --features wasm
+          rm -f playground/pkg/.gitignore
+
       - name: Copy Playground
-        run: cp -r playground/ dist/playground/
+        run: |
+          mkdir -p dist/playground
+          cp -r playground/. dist/playground/
+          test -f dist/playground/pkg/sunny_lang_bg.wasm
 
       - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v3
@@ -51,7 +64,7 @@ jobs:
 
   deploy:
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

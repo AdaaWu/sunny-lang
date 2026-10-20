@@ -4,6 +4,22 @@ use crate::environment::Environment;
 use crate::evaluator::{EvalResult, Evaluator};
 use crate::parser::Parser;
 
+fn esc(s: &str) -> String {
+    let mut o = String::with_capacity(s.len());
+    for c in s.chars() {
+        match c {
+            '\\' => o.push_str("\\\\"),
+            '"' => o.push_str("\\\""),
+            '\n' => o.push_str("\\n"),
+            '\r' => o.push_str("\\r"),
+            '\t' => o.push_str("\\t"),
+            c if (c as u32) < 0x20 => o.push_str(&format!("\\u{:04x}", c as u32)),
+            c => o.push(c),
+        }
+    }
+    o
+}
+
 /// 執行 Sunny 程式碼，回傳 JSON 結果
 /// { "output": [...], "result": "...", "error": null }
 #[wasm_bindgen]
@@ -12,7 +28,7 @@ pub fn eval_sunny(source: &str) -> String {
     let program = parser.parse();
 
     if !parser.errors.is_empty() {
-        let errors: Vec<String> = parser.errors.iter().map(|e| format!("\"{}\"", e)).collect();
+        let errors: Vec<String> = parser.errors.iter().map(|e| format!("\"{}\"", esc(e))).collect();
         return format!(
             "{{\"output\": [], \"result\": null, \"error\": [{}]}}",
             errors.join(", ")
@@ -26,13 +42,13 @@ pub fn eval_sunny(source: &str) -> String {
     let output: Vec<String> = evaluator
         .output_buffer
         .iter()
-        .map(|s| format!("\"{}\"", s.replace('\\', "\\\\").replace('"', "\\\"")))
+        .map(|s| format!("\"{}\"", esc(s)))
         .collect();
 
     let (result_str, error_str) = match result {
-        EvalResult::Val(val) => (format!("\"{}\"", val), "null".to_string()),
-        EvalResult::Output(val) => (format!("\"{}\"", val), "null".to_string()),
-        EvalResult::Err(msg) => ("null".to_string(), format!("\"{}\"", msg)),
+        EvalResult::Val(val) => (format!("\"{}\"", esc(&val.to_string())), "null".to_string()),
+        EvalResult::Output(val) => (format!("\"{}\"", esc(&val.to_string())), "null".to_string()),
+        EvalResult::Err(msg) => ("null".to_string(), format!("\"{}\"", esc(&msg))),
     };
 
     format!(
@@ -91,7 +107,7 @@ pub fn tokenize_sunny(source: &str) -> String {
                 crate::token::Token::Illegal(_) => "error",
                 _ => "operator",
             };
-            format!("[\"{}\", \"{}\"]", kind, format!("{}", t).replace('"', "\\\""))
+            format!("[\"{}\", \"{}\"]", kind, esc(&format!("{}", t)))
         })
         .collect();
 

@@ -405,7 +405,22 @@ impl Evaluator {
                     Arc::new(Mutex::new(None));
                 let result_writer = result_slot.clone();
 
-                let handle = std::thread::spawn(move || {
+                // wasm32 沒有執行緒：同步執行
+                #[cfg(target_arch = "wasm32")]
+                let handle: Option<std::thread::JoinHandle<()>> = {
+                    let mut eval = Evaluator::new();
+                    let mut env = ray_env;
+                    let res = eval.eval_block(&body_clone, &mut env);
+                    let outcome = match res {
+                        EvalResult::Val(v) | EvalResult::Output(v) => Ok(v),
+                        EvalResult::Err(msg) => Err(msg),
+                    };
+                    self.output_buffer.extend(eval.output_buffer.drain(..));
+                    *result_writer.lock().unwrap() = Some(outcome);
+                    None
+                };
+                #[cfg(not(target_arch = "wasm32"))]
+                let handle = Some(std::thread::spawn(move || {
                     let mut eval = Evaluator::new();
                     let mut env = ray_env;
                     let res = eval.eval_block(&body_clone, &mut env);
@@ -414,11 +429,11 @@ impl Evaluator {
                         EvalResult::Err(msg) => Err(msg),
                     };
                     *result_writer.lock().unwrap() = Some(outcome);
-                });
+                }));
 
                 EvalResult::Val(Value::RayHandle(RayResult {
                     value: result_slot,
-                    handle: Arc::new(Mutex::new(Some(handle))),
+                    handle: Arc::new(Mutex::new(handle)),
                 }))
             }
         }
@@ -1118,6 +1133,9 @@ impl Evaluator {
         if !args.is_empty() {
             return EvalResult::Err("time_now() takes no arguments".to_string());
         }
+        #[cfg(target_arch = "wasm32")]
+        let now = 0u64; // wasm32 無系統時鐘
+        #[cfg(not(target_arch = "wasm32"))]
         let now = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .unwrap_or_default()
