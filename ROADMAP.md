@@ -14,7 +14,7 @@
 | M4 自給自足 | ✅ | Markdown 渲染、Template 引擎、docs.sunny 文檔系統 |
 | 語言增強 | ✅ | for..in range(`0..10`)、閉包(`fn(x) { ... }`)、import 模組系統、`..` 語法 |
 
-**測試數量：157 tests，全部通過**
+**測試數量：180 tests，全部通過**
 
 ---
 

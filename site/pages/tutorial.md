@@ -26,7 +26,10 @@ lit err = Shadow("oops")  // Shadow
 
 ## 3. 函數
 
-函數用 `fn` 定義，必須帶 Resource Action 後綴：
+具名函數用 `fn` 定義，有兩個硬性規則：
+
+1. **參數必須標註型別**：`fn addShow(a: Int, b: Int)`。寫成 `fn foo(a)` 會得到 parse error。
+2. **名稱必須以 Resource Action 後綴結尾**：`index`、`show`、`store`、`update`、`remove`。違反時 Linter 會回報 `Lint error: function 'foo' must end with a Resource Action suffix` 並**中止執行**，不只是警告。
 
 ```sunny
 fn addShow(a: Int, b: Int) -> Int {
@@ -38,7 +41,7 @@ print(addShow(3, 4))  // 7
 
 ## 4. 閉包
 
-匿名函數可以省略名稱和型別：
+匿名函數（閉包）不受上述規則限制，可以省略名稱、型別與後綴：
 
 ```sunny
 lit double = fn(x) { out x * 2 }
@@ -114,4 +117,7 @@ match result {
 - [語法參考](syntax.html) — 完整語法規則
 - [型別系統](types.html) — 所有資料型別
 - [內建函數](builtins.html) — 可用的內建工具
-- [Playground](playground.html) — 線上試玩
+- [實作原理](internals.html) — 它是怎麼做出來的
+- [在 Playground 試玩](playground/index.html) — 不用安裝，直接在瀏覽器執行
+
+每個範例右上角的「試玩」按鈕會把程式碼帶進 Playground。

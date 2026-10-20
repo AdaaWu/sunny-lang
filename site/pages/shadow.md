@@ -23,7 +23,7 @@ print(err.message)   // something went wrong
 lit a = 10 / 0           // Shadow(division by zero)
 
 // List 越界
-lit b = [1, 2][99]       // Shadow(index 99 out of bounds)
+lit b = [1, 2][99]       // Shadow(index 99 out of bounds (length 2))
 
 // Map 找不到 key
 lit c = {"a": 1}["z"]    // Shadow(key 'z' not found)

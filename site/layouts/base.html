@@ -4,45 +4,66 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{ title }} - Sunny Lang</title>
+  <meta name="description" content="{{ description }}">
+  <meta name="theme-color" content="#1e1e2e">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Sunny Lang">
+  <meta property="og:title" content="{{ title }} - Sunny Lang">
+  <meta property="og:description" content="{{ description }}">
+  <meta property="og:url" content="https://adaawu.github.io/sunny-lang/{{ slug }}.html">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="{{ title }} - Sunny Lang">
+  <meta name="twitter:description" content="{{ description }}">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231e1e2e'/%3E%3Ccircle cx='32' cy='32' r='14' fill='%23f9e2af'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
+    /* 色票與 Playground IDE (playground/style.css) 共用 */
     :root {
-      --bg: #0f0f17;
-      --surface: #1a1a2e;
-      --card: #222240;
-      --border: #2d2d52;
-      --text: #e0e0f0;
-      --text-dim: #8888aa;
+      color-scheme: dark;
+      --bg: #1e1e2e;
+      --surface: #282a3a;
+      --card: #313244;
+      --border: #3a3d4d;
+      --text: #cdd6f4;
+      --text-dim: #9399b2;
       --accent: #f9e2af;
       --link: #89b4fa;
-      --code-bg: #16161e;
+      --code-bg: #181825;
       --keyword: #ff79c6;
       --string: #f1fa8c;
       --number: #bd93f9;
+      --comment: #7f8ab8;
+      --builtin: #50fa7b;
+      --type-color: #8be9fd;
+      --success: #a6e3a1;
+      --font-sans: 'Inter', 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
     body {
-      font-family: 'Inter', sans-serif;
+      font-family: var(--font-sans);
       background: var(--bg);
       color: var(--text);
       line-height: 1.7;
     }
-    .layout {
-      display: flex;
-      min-height: 100vh;
-    }
+    a:focus-visible, summary:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+    .layout { display: flex; min-height: 100vh; }
+
     /* Sidebar */
     .sidebar {
       width: 260px;
       background: var(--surface);
       border-right: 1px solid var(--border);
-      padding: 24px 0;
+      padding: 24px 0 16px;
       position: fixed;
-      top: 0;
-      left: 0;
+      top: 0; left: 0;
       height: 100vh;
       overflow-y: auto;
+      display: flex;
+      flex-direction: column;
     }
     .sidebar-logo {
       padding: 0 24px 20px;
@@ -52,127 +73,330 @@
       border-bottom: 1px solid var(--border);
       margin-bottom: 16px;
     }
-    .sidebar-logo span {
-      font-size: 0.75rem;
-      color: var(--text-dim);
-      font-weight: 400;
+    .sidebar-logo a { color: inherit; text-decoration: none; }
+    .sidebar-logo span { font-size: 0.75rem; color: var(--text-dim); font-weight: 400; }
+    .btn-play {
+      display: block;
+      margin: 0 16px 12px;
+      padding: 9px 14px;
+      text-align: center;
+      background: var(--accent);
+      color: #1e1e2e;
+      font-weight: 700;
+      font-size: 0.9rem;
+      border-radius: 8px;
+      text-decoration: none;
     }
-    .sidebar nav a {
+    .btn-play:hover { text-decoration: none; filter: brightness(1.08); }
+    nav a {
       display: block;
       padding: 8px 24px;
       color: var(--text-dim);
       text-decoration: none;
-      font-size: 0.9rem;
+      font-size: 0.92rem;
+      border-left: 3px solid transparent;
       transition: all 0.15s;
     }
-    .sidebar nav a:hover, .sidebar nav a.active {
-      color: var(--accent);
-      background: rgba(249, 226, 175, 0.05);
+    nav a:hover { color: var(--accent); background: rgba(249, 226, 175, 0.05); text-decoration: none; }
+    nav a.active { color: var(--accent); background: rgba(249, 226, 175, 0.08); border-left-color: var(--accent); font-weight: 600; }
+    .sidebar-foot { margin-top: auto; padding: 16px 24px 0; border-top: 1px solid var(--border); font-size: 0.85rem; }
+    .sidebar-foot a { color: var(--text-dim); }
+    .sidebar-foot a:hover { color: var(--accent); }
+
+    /* Mobile top bar (hidden on desktop) */
+    .topbar {
+      display: none;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 16px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
     }
+    .topbar .logo { font-weight: 700; color: var(--accent); text-decoration: none; font-size: 1.1rem; }
+    .topbar-right { display: flex; align-items: center; gap: 8px; }
+    .topbar .btn-play { margin: 0; padding: 6px 12px; font-size: 0.82rem; }
+    .mnav summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 6px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.85rem;
+      color: var(--text);
+      background: var(--card);
+      user-select: none;
+    }
+    .mnav summary::-webkit-details-marker { display: none; }
+    .mnav[open] summary { border-color: var(--accent); color: var(--accent); }
+    .mnav-panel {
+      position: absolute;
+      left: 0; right: 0; top: 100%;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 8px 0 12px;
+      max-height: 75vh;
+      overflow-y: auto;
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
+    }
+    .mnav-panel .gh { display: block; padding: 8px 24px; color: var(--text-dim); font-size: 0.92rem; }
+
     /* Content */
     .content {
       margin-left: 260px;
       flex: 1;
-      max-width: 800px;
+      min-width: 0;
+      max-width: 900px;
       padding: 48px 48px 80px;
     }
-    h1 { font-size: 2rem; color: var(--accent); margin-bottom: 16px; }
-    h2 { font-size: 1.4rem; color: var(--accent); margin: 32px 0 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
-    h3 { font-size: 1.1rem; color: var(--text); margin: 24px 0 8px; }
+    h1 { font-size: clamp(1.8rem, 4vw, 2.4rem); line-height: 1.25; color: var(--accent); margin-bottom: 16px; }
+    h2 { font-size: 1.4rem; color: var(--accent); margin: 40px 0 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px; scroll-margin-top: 72px; }
+    h3 { font-size: 1.1rem; color: var(--text); margin: 24px 0 8px; scroll-margin-top: 72px; }
     p { margin-bottom: 16px; }
     a { color: var(--link); text-decoration: none; }
     a:hover { text-decoration: underline; }
     ul, ol { margin: 0 0 16px 24px; }
     li { margin-bottom: 4px; }
     code {
-      font-family: 'JetBrains Mono', monospace;
+      font-family: var(--font-mono);
       background: var(--code-bg);
       padding: 2px 6px;
       border-radius: 4px;
       font-size: 0.88em;
+      overflow-wrap: anywhere;
     }
+    .pre-wrap { position: relative; margin-bottom: 16px; max-width: 100%; }
     pre {
       background: var(--code-bg);
       border: 1px solid var(--border);
       border-radius: 8px;
       padding: 16px;
       overflow-x: auto;
+      max-width: 100%;
       margin-bottom: 16px;
-      font-family: 'JetBrains Mono', monospace;
+      font-family: var(--font-mono);
       font-size: 0.88em;
       line-height: 1.6;
     }
-    pre code { background: none; padding: 0; }
+    .pre-wrap pre { margin-bottom: 0; }
+    pre code { background: none; padding: 0; overflow-wrap: normal; }
+    .pre-tools {
+      position: absolute; top: 6px; right: 6px;
+      display: flex; gap: 6px;
+      opacity: 0; transition: opacity 0.15s;
+    }
+    .pre-wrap:hover .pre-tools, .pre-wrap:focus-within .pre-tools { opacity: 1; }
+    @media (hover: none) { .pre-tools { opacity: 1; } }
+    .pre-tools button, .pre-tools a {
+      font: 600 0.72rem var(--font-sans);
+      color: var(--text);
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 3px 9px;
+      cursor: pointer;
+      text-decoration: none;
+      line-height: 1.5;
+    }
+    .pre-tools button:hover, .pre-tools a:hover { color: var(--accent); border-color: var(--accent); text-decoration: none; }
+    /* 語法高亮（與 Playground 相同色票） */
+    .tk-k { color: var(--keyword); }
+    .tk-s { color: var(--string); }
+    .tk-n { color: var(--number); }
+    .tk-c { color: var(--comment); font-style: italic; }
+    .tk-b { color: var(--builtin); }
+    .tk-t { color: var(--type-color); }
     blockquote {
       border-left: 3px solid var(--accent);
       padding: 8px 16px;
       margin: 16px 0;
-      color: var(--text-dim);
+      color: var(--text);
       background: var(--card);
       border-radius: 0 8px 8px 0;
     }
+    .content > blockquote:first-of-type { font-size: 1.1rem; }
     .table-wrap {
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
+      max-width: 100%;
       margin: 16px 0;
       border: 1px solid var(--border);
       border-radius: 8px;
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    th, td {
-      text-align: left;
-      padding: 10px 14px;
-      border-bottom: 1px solid var(--border);
-      vertical-align: top;
-    }
-    th {
-      color: var(--accent);
-      font-weight: 600;
-      background: var(--card);
-      white-space: nowrap;
-    }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { color: var(--accent); font-weight: 600; background: var(--card); white-space: nowrap; }
     tbody tr:last-child td { border-bottom: none; }
     tbody tr:hover td { background: var(--card); }
     td code { white-space: nowrap; }
     hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+
+    /* Hero + landing page */
+    .hero { padding: 8px 0 8px; }
+    .hero .eyebrow { color: var(--text-dim); font-size: 0.85rem; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; }
+    .hero h1 { font-size: clamp(2.4rem, 7vw, 3.6rem); margin-bottom: 8px; }
+    .hero .tagline { font-size: clamp(1.05rem, 2.4vw, 1.25rem); color: var(--text); margin-bottom: 24px; }
+    .hero-cta { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      border: 1px solid var(--border);
+      color: var(--text);
+      background: var(--card);
+    }
+    .btn:hover { text-decoration: none; border-color: var(--accent); color: var(--accent); }
+    .btn.primary { background: var(--accent); color: #1e1e2e; border-color: var(--accent); }
+    .btn.primary:hover { filter: brightness(1.08); color: #1e1e2e; }
+    .facts { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 0 0 8px; }
+    .facts li { margin: 0; padding: 3px 12px; border: 1px solid var(--border); border-radius: 999px; font-size: 0.82rem; color: var(--text-dim); background: var(--surface); }
+    .cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin: 16px 0 8px; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; min-width: 0; }
+    .card h3 { margin: 0 0 6px; color: var(--accent); font-size: 1.02rem; }
+    .card p { margin: 0; font-size: 0.92rem; color: var(--text-dim); }
+
+    /* Pager + footer */
+    .pager { display: flex; justify-content: space-between; gap: 12px; margin-top: 48px; }
+    .pager a {
+      display: block; flex: 1 1 0; min-width: 0;
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
+      color: var(--text);
+      font-weight: 600;
+    }
+    .pager a:hover { border-color: var(--accent); color: var(--accent); text-decoration: none; }
+    .pager small { display: block; color: var(--text-dim); font-weight: 400; font-size: 0.78rem; }
+    .pager .next { text-align: right; margin-left: auto; }
+    .pager .prev:only-child { max-width: 50%; }
+    .pager .next:only-child { max-width: 50%; }
     .footer {
-      margin-top: 48px;
+      margin-top: 40px;
       padding-top: 24px;
       border-top: 1px solid var(--border);
       color: var(--text-dim);
       font-size: 0.85rem;
       text-align: center;
     }
+    .footer a { color: var(--text-dim); text-decoration: underline; }
+    .footer a:hover { color: var(--accent); }
+
     @media (max-width: 768px) {
       .sidebar { display: none; }
-      .content { margin-left: 0; padding: 24px; }
+      .topbar { display: flex; }
+      .content { margin-left: 0; padding: 24px 16px 64px; }
+      .cards { grid-template-columns: minmax(0, 1fr); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      * { transition: none !important; }
     }
   </style>
 </head>
 <body>
+  <header class="topbar">
+    <a class="logo" href="index.html">Sunny Lang</a>
+    <div class="topbar-right">
+      <a class="btn-play" href="playground/index.html">&#9654; 試玩</a>
+      <details class="mnav">
+        <summary>選單</summary>
+        <div class="mnav-panel">
+          <nav>
+{{ nav }}
+          </nav>
+          <a class="gh" href="https://github.com/AdaaWu/sunny-lang">GitHub &#8599;</a>
+        </div>
+      </details>
+    </div>
+  </header>
   <div class="layout">
     <aside class="sidebar">
-      <div class="sidebar-logo">Sunny Lang <span>v0.1.0</span></div>
+      <div class="sidebar-logo"><a href="index.html">Sunny Lang</a> <span>v0.1.0</span></div>
+      <a class="btn-play" href="playground/index.html">&#9654; 在瀏覽器試玩</a>
       <nav>
-        <a href="index.html">Home</a>
-        <a href="tutorial.html">Tutorial</a>
-        <a href="syntax.html">Syntax Reference</a>
-        <a href="types.html">Type System</a>
-        <a href="builtins.html">Built-in Functions</a>
-        <a href="shadow.html">Shadow (Errors)</a>
-        <a href="server.html">HTTP Server</a>
-        <a href="playground.html">Playground</a>
+{{ nav }}
       </nav>
+      <div class="sidebar-foot">
+        <a href="https://github.com/AdaaWu/sunny-lang">GitHub &#8599;</a>
+      </div>
     </aside>
     <main class="content">
+{{ hero }}
       {{ content }}
+      <div class="pager">{{ pager }}</div>
       <div class="footer">
-        Powered by Sunny Lang &mdash; Built with Sunny
+        Sunny Lang &mdash; 本站由 Sunny 自己產生 &middot;
+        <a href="https://github.com/AdaaWu/sunny-lang/blob/main/site/site.sunny">site.sunny</a> &middot;
+        <a href="https://github.com/AdaaWu/sunny-lang">GitHub</a>
       </div>
     </main>
   </div>
+  <script>
+  (function () {
+    var KW = 'lit glow fn out if else for in while match is ray import and or not true false'.split(' ');
+    var TY = 'Int Float String Bool List Map Shadow'.split(' ');
+    var BI = 'print await read_file render_md render_template write_file len type_of to_int to_float to_string json_encode time_now'.split(' ');
+    function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+    function span(c, s) { return '<span class="tk-' + c + '">' + esc(s) + '</span>'; }
+    function hl(code) {
+      var out = '', i = 0, n = code.length, j, m;
+      while (i < n) {
+        var ch = code[i];
+        if (ch === '/' && code[i + 1] === '/') { j = code.indexOf('\n', i); if (j < 0) j = n; out += span('c', code.slice(i, j)); i = j; continue; }
+        if (ch === '/' && code[i + 1] === '*') { j = code.indexOf('*/', i + 2); j = j < 0 ? n : j + 2; out += span('c', code.slice(i, j)); i = j; continue; }
+        if (ch === '"' || ch === "'") {
+          j = i + 1;
+          while (j < n && code[j] !== ch) { if (code[j] === '\\') j++; j++; }
+          j++; out += span('s', code.slice(i, j)); i = j; continue;
+        }
+        if (/[0-9]/.test(ch)) { j = i; while (j < n && /[0-9.]/.test(code[j])) j++; out += span('n', code.slice(i, j)); i = j; continue; }
+        if (/[A-Za-z_]/.test(ch)) {
+          j = i; while (j < n && /[A-Za-z0-9_]/.test(code[j])) j++;
+          m = code.slice(i, j);
+          out += KW.indexOf(m) >= 0 ? span('k', m) : TY.indexOf(m) >= 0 ? span('t', m) : BI.indexOf(m) >= 0 ? span('b', m) : esc(m);
+          i = j; continue;
+        }
+        out += esc(ch); i++;
+      }
+      return out;
+    }
+    var blocks = document.querySelectorAll('.content pre');
+    for (var k = 0; k < blocks.length; k++) {
+      var pre = blocks[k], code = pre.querySelector('code');
+      if (!code) continue;
+      var text = code.textContent;
+      var isSunny = code.className.indexOf('language-sunny') >= 0;
+      if (isSunny) code.innerHTML = hl(text);
+      var wrap = document.createElement('div');
+      wrap.className = 'pre-wrap';
+      pre.parentNode.insertBefore(wrap, pre);
+      wrap.appendChild(pre);
+      var tools = document.createElement('div');
+      tools.className = 'pre-tools';
+      if (isSunny) {
+        var a = document.createElement('a');
+        a.textContent = '▶ 試玩';
+        a.title = '在 Playground 開啟此程式碼';
+        try { a.href = 'playground/index.html#' + btoa(encodeURIComponent(text.replace(/\n$/, ''))); } catch (e) { a = null; }
+        if (a) tools.appendChild(a);
+      }
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = '複製';
+      b.addEventListener('click', (function (btn, t) { return function () {
+        var done = function () { btn.textContent = '已複製'; setTimeout(function () { btn.textContent = '複製'; }, 1500); };
+        try { navigator.clipboard.writeText(t).then(done, function () {}); } catch (e) {}
+      }; })(b, text));
+      tools.appendChild(b);
+      wrap.appendChild(tools);
+    }
+  })();
+  </script>
 </body>
 </html>

@@ -4,9 +4,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sunny Playground</title>
+  <meta name="description" content="在瀏覽器中以 WebAssembly 執行 Sunny 程式碼，不需要後端。">
+  <meta name="theme-color" content="#1e1e2e">
+  <meta property="og:title" content="Sunny Playground">
+  <meta property="og:description" content="在瀏覽器中以 WebAssembly 執行 Sunny 程式碼，不需要後端。">
+  <meta property="og:url" content="https://adaawu.github.io/sunny-lang/playground/index.html">
+  <meta name="twitter:card" content="summary">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231e1e2e'/%3E%3Ccircle cx='32' cy='32' r='14' fill='%23f9e2af'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -18,6 +25,8 @@
     </select>
     <button class="btn btn-run" onclick="runCode()" title="Ctrl+Enter">Run</button>
     <button class="btn btn-share" onclick="shareCode()">Share</button>
+    <a class="btn btn-link" href="../index.html">Docs</a>
+    <a class="btn btn-link" href="https://github.com/AdaaWu/sunny-lang">GitHub</a>
   </div>
 </div>
 
@@ -35,6 +44,7 @@
     <div class="output-wrap" id="output">
       <div class="output-info">Press Run or Ctrl+Enter to execute.</div>
     </div>
+    <div class="panel-foot">想學更多？<a href="../tutorial.html">閱讀教學</a> &middot; <a href="../internals.html">實作原理</a></div>
   </div>
 </div>
 
@@ -62,13 +72,14 @@
       try {
         editor.value = decodeURIComponent(atob(hash));
       } catch (e) {
-        editor.value = EXAMPLES.hello.code;
+        editor.value = EXAMPLES.shadow.code;
       }
     } else {
-      editor.value = EXAMPLES.hello.code;
+      editor.value = EXAMPLES.shadow.code;
     }
     updateHighlight();
-    initWasm();
+    // WASM 載入完成後自動執行一次，輸出面板不會是空的
+    Promise.resolve(initWasm()).then(() => { try { runCode(); } catch (e) {} }, () => {});
   }
 
   function loadExample() {
